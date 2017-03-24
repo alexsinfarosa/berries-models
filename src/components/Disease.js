@@ -25,7 +25,8 @@ class Disease extends Component {
           {this.props.store.app.selectDisease
             ? null
             : <option>Select Disease</option>}
-          <option value="Cercospora Beticola">Cercospora Beticola</option>
+          <option value="Strawberries">Strawberries</option>
+          <option value="Blueberries">Blueberries</option>
         </Select>
       </Selector>
     );

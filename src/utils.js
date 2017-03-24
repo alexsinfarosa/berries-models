@@ -282,3 +282,55 @@ export const matchIconsToStations = (stations, state) => {
   });
   return arr;
 };
+
+export const logData = data => {
+  // const label = ([raw]) => {
+  //   const [color, label, ...message] = raw.split(" ");
+  //   return [
+  //     `%c${label}%c ${message.join(" ")}`,
+  //     `color: white;
+  //       background: ${color};
+  //       padding: .2em .2em`,
+  //     ""
+  //   ];
+  // };
+
+  return data.map(day => {
+    const M = day
+      .filter(d => Array.isArray(d))
+      .map(e => e.filter(d => d === "M").length);
+    console.log(`%c${day[0]}`, `color: red; font-size: 12px`);
+    console.log(
+      `TP -> %c${M[0]} %c${day[1]}`,
+      `color: red;
+        font-size: 12px;
+        margin-right: 10px;
+      `,
+      `background: #FFA8A8`
+    );
+    console.log(
+      `RH -> %c${M[1]} %c${day[2]}`,
+      `color: red;
+        font-size: 12px;
+        margin-right: 10px;
+      `,
+      `background: #D8D8D8`
+    );
+    console.log(
+      `LW -> %c${M[2]} %c${day[3]}`,
+      `color: red;
+        font-size: 12px;
+        margin-right: 10px;
+      `,
+      `background: #73EBC3`
+    );
+    console.log(
+      `PT -> %c${M[3]} %c${day[4]}`,
+      `color: red;
+        font-size: 12px;
+        margin-right: 10px;
+      `,
+      `background: #81CCF4`
+    );
+  });
+};

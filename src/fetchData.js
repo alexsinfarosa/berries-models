@@ -4,7 +4,8 @@ import addDays from "date-fns/add_days";
 import {
   michiganIdAdjustment,
   networkTemperatureAdjustment,
-  networkHumidityAdjustment
+  networkHumidityAdjustment,
+  logData
 } from "./utils";
 
 // Fetch acis data -------------------------------------------------------------------------
@@ -15,8 +16,14 @@ export const fetchACISData = (station, startDate, endDate) => {
     // Plus 6 days because we account for the noonToNoon function
     edate: format(addDays(endDate, 6), "YYYY-MM-DD"),
     elems: [
+      // temperature
       networkTemperatureAdjustment(station.network),
-      networkHumidityAdjustment(station.network)
+      // relative humidity
+      networkHumidityAdjustment(station.network),
+      // leaf wetness
+      "118",
+      // precipitation
+      "5"
     ]
   };
 
@@ -64,8 +71,14 @@ export const fetchSisterStationData = (
     sdate: startDate,
     edate: format(addDays(endDate, 6), "YYYY-MM-DD"),
     elems: [
-      networkTemperatureAdjustment(network),
-      networkHumidityAdjustment(network)
+      // temperature
+      networkTemperatureAdjustment(station.network),
+      // relative humidity
+      networkHumidityAdjustment(station.network),
+      // leaf wetness
+      "118",
+      // precipitation
+      "5"
     ]
   };
 
@@ -118,20 +131,41 @@ export const fetchForecastRH = (station, startDate, endDate) => {
     });
 };
 
+// Fetch forecast relative humidity ---------------------------------------------------------
+export const fetchLeafWetness = (station, startDate, endDate) => {
+  return axios
+    .get(
+      `http://newa.nrcc.cornell.edu/newaUtil/getFcstData/${station.id}/${station.network}/qpf/${startDate}/${format(addDays(endDate, 6), "YYYY-MM-DD")}`
+    )
+    .then(res => {
+      if (!res.data.hasOwnProperty("error")) {
+        return res.data.data;
+      }
+      console.log(res.data.error);
+    })
+    .catch(err => {
+      console.log(err);
+    });
+};
+
 // Fetch forecast data ----------------------------------------------------------------------
 export const fetchForecastData = (station, startDate, endDate) => {
   return axios
     .all([
       fetchForecastTemps(station, startDate, endDate),
-      fetchForecastRH(station, startDate, endDate)
+      fetchForecastRH(station, startDate, endDate),
+      fetchLeafWetness(station, startDate, endDate)
     ])
     .then(res => {
-      const datesAndTemps = res[0];
+      const dates = res[0].map(day => day[0]);
+      const TP = res[0].map(day => day[1]);
       const RH = res[1].map(day => day[1]);
-      let data = datesAndTemps.map((day, i) => {
-        return day.concat([RH[i]]);
+      const PT = res[2].map(day => day[1]);
+      let results = [];
+      dates.map((day, i) => {
+        results.push([dates[i], TP[i], RH[i], PT[i]]);
       });
-      return data;
+      return results;
     })
     .catch(err => {
       console.log(err);

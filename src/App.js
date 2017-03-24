@@ -19,7 +19,8 @@ import {
   noonToNoon,
   replaceNonConsecutiveMissingValues,
   containsMissingValues,
-  replaceConsecutiveMissingValues
+  replaceConsecutiveMissingValues,
+  logData
 } from "./utils";
 
 // styled-components
@@ -61,8 +62,11 @@ class App extends Component {
 
   fetchAllStations = () => {
     axios
-      .get("http://newa.nrcc.cornell.edu/newaUtil/stateStationList/all")
+      // eslw - stations reporting leaf wetness or relative humidity
+      .get("http://newa.nrcc.cornell.edu/newaUtil/stateStationList/eslw")
       .then(res => {
+        // console.log(res.data);
+
         this.props.store.app.setStations(res.data.stations);
         this.calculate();
         this.props.store.app.setIsGraphDisplayed(true);
@@ -105,12 +109,12 @@ class App extends Component {
     // Fetch ACIS data
     acis = await fetchACISData(station, startDate, endDate);
     acis = replaceNonConsecutiveMissingValues(acis);
+    // logData(acis);
     if (!containsMissingValues(acis)) {
       const shiftedACISData = noonToNoon(station, acis);
       this.props.store.app.setACISData(shiftedACISData);
       return;
     }
-    console.log("1");
 
     // Get Id and network to fetch sister station data
     const idAndNetwork = await getSisterStationIdAndNetwork(station);
@@ -128,7 +132,6 @@ class App extends Component {
       this.props.store.app.setACISData(shiftedACISData);
       return;
     }
-    console.log("2");
     const forecastData = await fetchForecastData(station, startDate, endDate);
     acis = replaceConsecutiveMissingValues(forecastData, acis);
 
@@ -153,7 +156,7 @@ class App extends Component {
           <MyApp>
             <Testing />
             <h2 style={{ marginTop: "0" }}>
-              Cercospora Beticola Infection Prediction Model
+              Berries Models
             </h2>
             <Main>
               <LeftContainer>

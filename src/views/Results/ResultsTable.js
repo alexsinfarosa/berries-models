@@ -1,6 +1,6 @@
 import React, { Component } from "react";
 import { inject, observer } from "mobx-react";
-import ResultsGraph from "./ResultsGraph";
+// import ResultsGraph from "./ResultsGraph";
 import _ from "lodash";
 import { format, isBefore, subDays } from "date-fns";
 
@@ -66,29 +66,16 @@ export default class ResultsTable extends Component {
     }
 
     // const displayA2Day = A2Day.map((e, i) => <td key={i}>{e}</td>);
-    const daily = DICV.map((e, i) => <td key={i}>{e}</td>);
-
-    const displayA2Day = A2Day.map((e, i) => {
-      if (e < 6) {
-        return <Low key={i}>{e}</Low>;
-      } else if (e === 6) {
-        return <Caution key={i}>{e}</Caution>;
-      }
-      return <High key={i}>{e}</High>;
-    });
-
-    const a2DayInfectionRisk = A2Day.map((e, i) => {
-      if (e < 6) {
-        return <Low key={i}><small>Unfavorable</small></Low>;
-      } else if (e === 6) {
-        return <Caution key={i}><small>Marginal</small></Caution>;
-      }
-      return <High key={i}><small>Favorable</small></High>;
-    });
-
-    const displayA14Day = A14Day.map((e, i) => <td key={i}>{e}</td>);
-    const displayA21Day = A21Day.map((e, i) => <td key={i}>{e}</td>);
-    const displaySeason = season.map((e, i) => <td key={i}>{e}</td>);
+    // const daily = DICV.map((e, i) => <td key={i}>{e}</td>);
+    //
+    // const displayA2Day = A2Day.map((e, i) => {
+    //   if (e < 6) {
+    //     return <Low key={i}>{e}</Low>;
+    //   } else if (e === 6) {
+    //     return <Caution key={i}>{e}</Caution>;
+    //   }
+    //   return <High key={i}>{e}</High>;
+    // });
 
     return (
       <table>
@@ -107,28 +94,20 @@ export default class ResultsTable extends Component {
         </thead>
         <tbody>
           <tr>
-            <th><small>Daily <br />Infection Values</small></th>
-            {_.takeRight(daily, 8)}
+            <th>Gray mold (Botrytis)</th>
+            {/* {_.takeRight(daily, 8)} */}
           </tr>
           <tr>
-            <th><small>2-Day <br /> Total Infection Values</small></th>
-            {_.takeRight(displayA2Day, 8)}
+            <th>Risk Levels</th>
+            {/* {_.takeRight(daily, 8)} */}
           </tr>
           <tr>
-            <th><small>Daily <br /> Infection Risk</small></th>
-            {_.takeRight(a2DayInfectionRisk, 8)}
+            <th>Anthracnose</th>
+            {/* {_.takeRight(displayA2Day, 8)} */}
           </tr>
           <tr>
-            <th><small>14-Day <br />Accum. Infection Values</small></th>
-            {_.takeRight(displayA14Day, 8)}
-          </tr>
-          <tr>
-            <th><small>21-Day <br /> Accum. Infection Values</small></th>
-            {_.takeRight(displayA21Day, 8)}
-          </tr>
-          <tr>
-            <th><small>Season <br /> Total Infection Values</small></th>
-            {_.takeRight(displaySeason, 8)}
+            <th>Risk Levels</th>
+            {/* {_.takeRight(daily, 8)} */}
           </tr>
           <tr>
             <td colSpan="9" className="has-text-centered graph">
@@ -138,7 +117,7 @@ export default class ResultsTable extends Component {
                 Infection Value Graph
               </a>
 
-              {isGraphDisplayed && <ResultsGraph />}
+              {/* {isGraphDisplayed && <ResultsGraph />} */}
             </td>
           </tr>
         </tbody>
