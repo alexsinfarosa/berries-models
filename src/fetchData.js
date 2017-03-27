@@ -26,12 +26,13 @@ export const fetchACISData = (station, startDate, endDate) => {
     ]
   };
 
-  // console.log(params);
+  console.log(params);
 
   return axios
     .post("http://data.test.rcc-acis.org/StnData", params)
     .then(res => {
       if (!res.data.hasOwnProperty("error")) {
+        console.log(res.data.data.slice(0, 3));
         return res.data.data;
       }
       console.log(res.data.error);
@@ -44,7 +45,7 @@ export const fetchACISData = (station, startDate, endDate) => {
 // Get sister station Id and network --------------------------------------------------------
 export const getSisterStationIdAndNetwork = station => {
   return axios(
-    `http://newa.nrcc.cornell.edu/newaUtil/stationSisterInfo/${station.id}/${station.network}`
+    `https://newa2.nrcc.cornell.edu/newaUtil/stationSisterInfo/${station.id}/${station.network}`
   )
     .then(res => {
       return res.data.temp;
@@ -100,7 +101,7 @@ export const fetchSisterStationData = (
 export const fetchForecastTemps = (station, startDate, endDate) => {
   return axios
     .get(
-      `http://newa.nrcc.cornell.edu/newaUtil/getFcstData/${station.id}/${station.network}/temp/${startDate}/${format(addDays(endDate, 6), "YYYY-MM-DD")}`
+      `https://newa2.nrcc.cornell.edu/newaUtil/getFcstData/${station.id}/${station.network}/temp/${startDate}/${format(addDays(endDate, 6), "YYYY-MM-DD")}`
     )
     .then(res => {
       if (!res.data.hasOwnProperty("error")) {
@@ -117,7 +118,7 @@ export const fetchForecastTemps = (station, startDate, endDate) => {
 export const fetchForecastRH = (station, startDate, endDate) => {
   return axios
     .get(
-      `http://newa.nrcc.cornell.edu/newaUtil/getFcstData/${station.id}/${station.network}/rhum/${startDate}/${format(addDays(endDate, 6), "YYYY-MM-DD")}`
+      `https://newa2.nrcc.cornell.edu/newaUtil/getFcstData/${station.id}/${station.network}/rhum/${startDate}/${format(addDays(endDate, 6), "YYYY-MM-DD")}`
     )
     .then(res => {
       if (!res.data.hasOwnProperty("error")) {
@@ -131,10 +132,10 @@ export const fetchForecastRH = (station, startDate, endDate) => {
 };
 
 // Fetch forecast relative humidity ---------------------------------------------------------
-export const fetchLeafWetness = (station, startDate, endDate) => {
+export const fetchPrecipitation = (station, startDate, endDate) => {
   return axios
     .get(
-      `http://newa.nrcc.cornell.edu/newaUtil/getFcstData/${station.id}/${station.network}/qpf/${startDate}/${format(addDays(endDate, 6), "YYYY-MM-DD")}`
+      `https://newa2.nrcc.cornell.edu/newaUtil/getFcstData/${station.id}/${station.network}/qpf/${startDate}/${format(addDays(endDate, 6), "YYYY-MM-DD")}`
     )
     .then(res => {
       if (!res.data.hasOwnProperty("error")) {
@@ -153,11 +154,10 @@ export const fetchForecastData = (station, startDate, endDate) => {
     .all([
       fetchForecastTemps(station, startDate, endDate),
       fetchForecastRH(station, startDate, endDate),
-      fetchLeafWetness(station, startDate, endDate)
+      fetchPrecipitation(station, startDate, endDate)
     ])
     .then(res => {
       const dates = res[0].map(day => day[0]);
-      console.log(dates);
       const TP = res[0].map(day => day[1]);
       const RH = res[1].map(day => day[1]);
       const PT = res[2].map(day => day[1]);

@@ -49,13 +49,21 @@ export const replaceConsecutiveMissingValues = (sister, acis) => {
   });
 };
 
-// Returns true if the temperature array in data has at least one M value
+// Returns true if the there are Missing values in the sub arrays (TP, RH, LW, PT)
 export const containsMissingValues = data => {
-  const numOfMissingValues = data.map(day => day[1].find(e => e === "M"));
-  if (numOfMissingValues.find(e => e === "M") === "M") {
-    return true;
-  }
-  return false;
+  const TPandRH = data
+    .map(day => day[1].filter(e => e === "M").length)
+    .reduce((acc, val) => acc + val, 0);
+
+  const LW = data
+    .map(day => day[3].filter(e => e === "M").length)
+    .reduce((acc, val) => acc + val, 0);
+
+  const PT = data
+    .map(day => day[4].filter(e => e === "M").length)
+    .reduce((acc, val) => acc + val, 0);
+
+  return (TPandRH && LW && PT) > 0 ? true : false;
 };
 
 // Handling Temperature parameter and Michigan network id adjustment
@@ -138,96 +146,65 @@ export const above95Only = data => {
   return results;
 };
 
+export const relativeHumidityAdjustment = (station, data) => {
+  return data.map(e => {
+    return e === "M" ? "M" : Math.round(e / (0.0047 * e + 0.53)).toString();
+  });
+};
+
 // This function will shift data from (1, 24) to (12, 24)
-// Returns and array of objects where eache object has the following
-// properties:
-// {date: '2016-01-01', hr: ['34','44'...], temp: ['67','45'...], hrsRH: 3, avgT: 67}
 export const noonToNoon = (station, data) => {
+  let results = [];
+
   // get all dates
   const dates = data.map(day => day[0]);
 
-  // relative humidity
-  const hum = data.map(day => day[2]);
-  const humFlat = [].concat(...hum);
-  let humFlatNum = humFlat.map(e => parseInt(e, 10));
-  // console.log(`${humFlatNum}`);
-  if (station.network === "icao") {
-    humFlatNum = humFlatNum.map(e => {
-      if (e === "M") {
-        return "M";
-      } else {
-        return Math.round(e / (0.0047 * e + 0.53));
-      }
-    });
-  }
-  // console.log(`${humFlatNum}`);
-
-  // Filter relative humidity values above the chosen percentage
-  // If there are NaN values it replaces with 0
-  const humFlatNumAbove95RH = humFlatNum.map(e => e > 95 ? e : 0);
-
-  // unflatten RH array
-  const humNumAbove95RH = [];
-  const humFlatNumAbove95RHCopy = [...humFlatNumAbove95RH];
-  while (humFlatNumAbove95RHCopy.length > 24) {
-    humNumAbove95RH.push(humFlatNumAbove95RHCopy.splice(12, 24));
+  // shifting Temperature array
+  const TP = data.map(day => day[1]);
+  const TPFlat = [].concat(...TP);
+  let TPShifted = [];
+  while (TPFlat.length > 24) {
+    TPShifted.push(TPFlat.splice(12, 24));
   }
 
-  // determine the amount of hours with a relative humidity above the chosen percentage
-  const RHCount = humNumAbove95RH.map(day => day.filter(e => e > 0).length);
-
-  // hourly temperatures
-  const temp = data.map(day => day[1]);
-  const tempFlat = [].concat(...temp);
-  const tempFlatNum = tempFlat.map(e => parseInt(e, 10));
-
-  // filter hourly temperature vlues above the chosen percentage
-  const tempFlatNumAbove95RH = humFlatNumAbove95RH.map(
-    (e, i) => e === 0 ? 0 : tempFlatNum[i]
-  );
-
-  // unflatten the temperature array
-  const tempNumAbove95RH = [];
-  while (tempFlatNumAbove95RH.length > 24) {
-    tempNumAbove95RH.push(tempFlatNumAbove95RH.splice(12, 24));
+  // shifting relative humidity array
+  const RH = data.map(day => day[2]);
+  let RHFlat = [].concat(...RH);
+  RHFlat = relativeHumidityAdjustment(station, RHFlat);
+  let RHShifted = [];
+  while (RHFlat.length > 24) {
+    RHShifted.push(RHFlat.splice(12, 24));
   }
 
-  // calculating average temperature
-  const avgT = tempNumAbove95RH.map(day => {
-    const aboveVal = day.filter(e => e > 0);
-    if (aboveVal.length > 0) {
-      return Math.round(
-        aboveVal.reduce((acc, val) => acc + val, 0) / aboveVal.length
-      );
-    }
-    return 0;
-  });
-
-  // relative humidity (HR) array
-  const hArr = [];
-  while (humFlatNum.length > 24) {
-    hArr.push(humFlatNum.splice(12, 24));
+  // shifting leaf wetness array
+  const LW = data.map(day => day[3]);
+  const LWFlat = [].concat(...LW);
+  let LWShifted = [];
+  while (LWFlat.length > 24) {
+    LWShifted.push(LWFlat.splice(12, 24));
   }
 
-  // temperature array
-  const tArr = [];
-  while (tempFlatNum.length > 24) {
-    tArr.push(tempFlatNum.splice(12, 24));
+  // shifting precipitation array
+  const PT = data.map(day => day[4]);
+  const PTFlat = [].concat(...PT);
+  let PTShifted = [];
+  while (PTFlat.length > 24) {
+    PTShifted.push(PTFlat.splice(12, 24));
   }
 
-  let res = [];
-  tArr.forEach((temps, i) => {
-    res.push({
-      date: dates[i],
-      rh: hArr[i],
-      temp: temps,
-      hrsRH: RHCount[i],
-      avgT: avgT[i]
-    });
-  });
-  return res;
+  for (const [i, el] of dates.entries()) {
+    results[i] = [el, TPShifted[i], RHShifted[i], LWShifted[i], PTShifted[i]];
+  }
+
+  return results;
 };
 
+export const IndexStrawberryGreyMold = data => {
+  const W = 0;
+  const T = 0;
+
+  const index = -4.268 + 0.0294 * W * T - 0.0901 * W - 0.0000235 * (T ^ 3);
+};
 // Determine Daily Infection Condition Values (DICV) from the table
 export const lookUpToTable = (table, hrsRH, avgT) => {
   const temps = table.filter(e => e[hrsRH])[0][hrsRH];
@@ -299,6 +276,7 @@ export const logData = data => {
     const M = day
       .filter(d => Array.isArray(d))
       .map(e => e.filter(d => d === "M").length);
+
     console.log(`%c${day[0]}`, `color: red; font-size: 12px`);
     console.log(
       `TP -> %c${M[0]} %c${day[1]}`,

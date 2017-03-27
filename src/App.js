@@ -63,7 +63,7 @@ class App extends Component {
   fetchAllStations = () => {
     axios
       // eslw - stations reporting leaf wetness or relative humidity
-      .get("http://newa.nrcc.cornell.edu/newaUtil/stateStationList/eslw")
+      .get("https://newa2.nrcc.cornell.edu/newaUtil/stateStationList/eslw")
       .then(res => {
         // console.log(res.data);
 
@@ -108,7 +108,8 @@ class App extends Component {
 
     // Fetch ACIS data
     acis = await fetchACISData(station, startDate, endDate);
-    // logData(acis);
+    // logData(acis.slice(0, 2));
+    logData(acis);
     acis = replaceNonConsecutiveMissingValues(acis);
     // logData(acis);
     if (!containsMissingValues(acis)) {
