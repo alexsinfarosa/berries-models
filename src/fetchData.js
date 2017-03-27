@@ -4,8 +4,7 @@ import addDays from "date-fns/add_days";
 import {
   michiganIdAdjustment,
   networkTemperatureAdjustment,
-  networkHumidityAdjustment,
-  logData
+  networkHumidityAdjustment // logData
 } from "./utils";
 
 // Fetch acis data -------------------------------------------------------------------------
@@ -158,6 +157,7 @@ export const fetchForecastData = (station, startDate, endDate) => {
     ])
     .then(res => {
       const dates = res[0].map(day => day[0]);
+      console.log(dates);
       const TP = res[0].map(day => day[1]);
       const RH = res[1].map(day => day[1]);
       const PT = res[2].map(day => day[1]);

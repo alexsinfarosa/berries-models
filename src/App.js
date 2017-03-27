@@ -108,6 +108,7 @@ class App extends Component {
 
     // Fetch ACIS data
     acis = await fetchACISData(station, startDate, endDate);
+    // logData(acis);
     acis = replaceNonConsecutiveMissingValues(acis);
     // logData(acis);
     if (!containsMissingValues(acis)) {

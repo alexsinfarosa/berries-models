@@ -7,6 +7,7 @@
   },
   "dependencies": {
     "axios": "^0.15.3",
+    "chroma-js": "^1.2.2",
     "date-fns": "^1.28.0",
     "leaflet": "^1.0.3",
     "lodash": "^4.17.4",

@@ -8,7 +8,7 @@ import { format, isBefore, subDays } from "date-fns";
 import "./results.css";
 
 // styled-components
-import { Low, Caution, High } from "./styles";
+// import { Low, Caution, High } from "./styles";
 
 @inject("store")
 @observer
@@ -18,11 +18,11 @@ export default class ResultsTable extends Component {
       dates,
       stationR,
       endDateR,
-      DICV,
-      A2Day,
-      A14Day,
-      A21Day,
-      season,
+      // DICV,
+      // A2Day,
+      // A14Day,
+      // A21Day,
+      // season,
       currentYear,
       startDateYear,
       isGraphDisplayed,
