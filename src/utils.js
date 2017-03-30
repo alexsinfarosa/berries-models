@@ -1,9 +1,78 @@
+// Returns an array of objects. Each object is a station with the following
+export const matchIconsToStations = (protocol, stations, state) => {
+  const arr = [];
+  const newa = `${protocol}//newa2.nrcc.cornell.edu/gifs/newa_small.png`;
+  const newaGray = `${protocol}//newa2.nrcc.cornell.edu/gifs/newa_smallGray.png`;
+  const airport = `${protocol}//newa2.nrcc.cornell.edu/gifs/airport.png`;
+  const airportGray = `${protocol}//newa2.nrcc.cornell.edu/gifs/airportGray.png`;
+  const culog = `${protocol}//newa2.nrcc.cornell.edu/gifs/culog.png`;
+  const culogGray = `${protocol}//newa2.nrcc.cornell.edu/gifs/culogGray.png`;
+
+  stations.forEach(station => {
+    if (
+      station.network === "newa" ||
+      station.network === "njwx" ||
+      station.network === "miwx" ||
+      ((station.network === "cu_log" || station.network === "culog") &&
+        station.state !== "NY")
+    ) {
+      const newObj = station;
+      station.state === state.postalCode || state.postalCode === "ALL"
+        ? (newObj["icon"] = newa)
+        : (newObj["icon"] = newaGray);
+      arr.push(newObj);
+    } else if (station.network === "cu_log" || station.network === "culog") {
+      const newObj = station;
+      station.state === state.postalCode || state.postalCode === "ALL"
+        ? (newObj["icon"] = culog)
+        : (newObj["icon"] = culogGray);
+      newObj["icon"] = culog;
+      arr.push(newObj);
+    } else if (station.network === "icao") {
+      const newObj = station;
+      station.state === state.postalCode || state.postalCode === "ALL"
+        ? (newObj["icon"] = airport)
+        : (newObj["icon"] = airportGray);
+      arr.push(newObj);
+    }
+  });
+  return arr;
+};
+
 // Returns the average of two numbers.
-// Inputs are of type String
 export const avgTwoStringNumbers = (a, b) => {
   const aNum = parseFloat(a);
   const bNum = parseFloat(b);
   return Math.round((aNum + bNum) / 2).toString();
+};
+
+// Handling Temperature parameter and Michigan network id adjustment
+export const networkTemperatureAdjustment = network => {
+  // Handling different temperature parameter for each network
+  if (network === "newa" || network === "icao" || network === "njwx") {
+    return "23";
+  } else if (
+    network === "miwx" || (network === "cu_log" || network === "culog")
+  ) {
+    return "126";
+  }
+};
+
+// Handling Relative Humidity Adjustment
+export const networkHumidityAdjustment = network =>
+  network === "miwx" ? "143" : "24";
+
+// Handling Michigan state network adjustment
+export const michiganIdAdjustment = station => {
+  if (
+    station.state === "MI" &&
+    station.network === "miwx" &&
+    station.id.slice(0, 3) === "ew_"
+  ) {
+    // example: ew_ITH
+    return station.id.slice(3, 6);
+  }
+  return station.id;
 };
 
 // It replaces non consecutive values in data with the average
@@ -12,17 +81,17 @@ export const replaceNonConsecutiveMissingValues = data => {
   return data.map(day => {
     return day.map(param => {
       if (Array.isArray(param)) {
-        return param.map((val, i) => {
-          if (i === 0 && val === "M") {
+        return param.map((e, i) => {
+          if (i === 0 && e === "M") {
             return param[i + 1];
-          } else if (i === param.length - 1 && val === "M") {
+          } else if (i === param.length - 1 && e === "M") {
             return param[i - 1];
           } else if (
-            val === "M" && param[i - 1] !== "M" && param[i + 1] !== "M"
+            e === "M" && param[i - 1] !== "M" && param[i + 1] !== "M"
           ) {
             return avgTwoStringNumbers(param[i - 1], param[i + 1]);
           } else {
-            return val;
+            return e;
           }
         });
       }
@@ -55,105 +124,67 @@ export const containsMissingValues = data => {
     .map(day => day[1].filter(e => e === "M").length)
     .reduce((acc, val) => acc + val, 0);
 
-  const LW = data
-    .map(day => day[3].filter(e => e === "M").length)
-    .reduce((acc, val) => acc + val, 0);
-
-  const PT = data
-    .map(day => day[4].filter(e => e === "M").length)
-    .reduce((acc, val) => acc + val, 0);
-
-  return (TPandRH && LW && PT) > 0 ? true : false;
-};
-
-// Handling Temperature parameter and Michigan network id adjustment
-export const networkTemperatureAdjustment = network => {
-  // Handling different temperature parameter for each network
-  if (network === "newa" || network === "icao" || network === "njwx") {
-    return "23";
-  } else if (network === "miwx" || network === "cu_log") {
-    return "126";
-  }
+  return TPandRH > 0 ? true : false;
 };
 
 // Returns an array similar to ACIS with the rh sub array containing new values.
 // The new values are calculated according to the equation below.
 export const RHAdjustment = data => {
-  let results = [];
-
-  data.forEach(day => {
-    let currentDay = [day[0], day[1], []];
-
-    day[2].map((e, i) => {
-      let rh;
-      if (e !== "M") {
-        rh = Math.round(parseFloat(e) / (0.0047 * parseFloat(e) + 0.53));
-      } else {
-        rh = e;
+  return data.map(day => {
+    return day.map((param, i) => {
+      // Modify only RH array
+      if (i === 2) {
+        return param.map(e => {
+          if (e !== "M") {
+            return Math.round(
+              parseFloat(e) / (0.0047 * parseFloat(e) + 0.53)
+            ).toString();
+          } else {
+            return e;
+          }
+        });
       }
-      currentDay[2].push(rh.toString());
+      return param;
     });
-    results.push(currentDay);
   });
-
-  return results;
 };
 
-// Handling Relative Humidity Adjustment
-export const networkHumidityAdjustment = network =>
-  network === "miwx" ? "143" : "24";
-
-// Returns and array of Accumulation Infection Values
-export const accumulationInfectionValues = data => {
+// Returns an array with cumulative Daily Infection Critical Values
+export const cumulativeDICV = dicv => {
   const arr = [];
-  data.reduce((prev, curr, i) => arr[i] = prev + curr, 0);
+  dicv.reduce((prev, curr, i) => arr[i] = prev + curr, 0);
   return arr;
 };
 
-// Handling Michigan state network adjustment
-export const michiganIdAdjustment = station => {
-  if (
-    station.state === "MI" &&
-    station.network === "miwx" &&
-    station.id.slice(0, 3) === "ew_"
-  ) {
-    // example: ew_ITH
-    return station.id.slice(3, 6);
-  }
-  return station.id;
-};
-
-// Returns an array similar to ACIS. The rh array contains only values
-// above 95. The temp array contains only temperature values where rh was
-// above 95.
-export const above95Only = data => {
+// For each day it returns only temperature values where leaf wetness was above 90.
+export const above90 = data => {
   let results = [];
 
-  data.forEach(day => {
-    let currentDay = [day[0], [], []];
+  for (const day of data) {
+    let currentDay = [day[0], [], [], [], []];
 
-    day[2].map((e, i) => {
-      if (parseFloat(e) > 95) {
+    for (let [i, e] of day[3].entries()) {
+      if (parseFloat(e) > 90) {
         currentDay[1].push(day[1][i]);
         currentDay[2].push(e);
       }
-    });
-    if (currentDay[2].length > 0) {
-      results.push(currentDay);
     }
-  });
-
+    results.push(currentDay);
+  }
   return results;
 };
 
-export const relativeHumidityAdjustment = (station, data) => {
-  return data.map(e => {
-    return e === "M" ? "M" : Math.round(e / (0.0047 * e + 0.53)).toString();
-  });
+// Returns average
+export const average = data => {
+  if (data.length === 0) {
+    return 0;
+  }
+  let results = data.map(e => parseFloat(e));
+  return Math.round(results.reduce((acc, val) => acc + val, 0) / data.length);
 };
 
-// This function will shift data from (1, 24) to (12, 24)
-export const noonToNoon = (station, data) => {
+// This function will shift data from (0, 23) to (12, 24)
+export const noonToNoon = data => {
   let results = [];
 
   // get all dates
@@ -168,9 +199,8 @@ export const noonToNoon = (station, data) => {
   }
 
   // shifting relative humidity array
-  const RH = data.map(day => day[2]);
-  let RHFlat = [].concat(...RH);
-  RHFlat = relativeHumidityAdjustment(station, RHFlat);
+  let RH = data.map(day => day[2]);
+  const RHFlat = [].concat(...RH);
   let RHShifted = [];
   while (RHFlat.length > 24) {
     RHShifted.push(RHFlat.splice(12, 24));
@@ -199,80 +229,72 @@ export const noonToNoon = (station, data) => {
   return results;
 };
 
-export const IndexStrawberryGreyMold = data => {
-  const W = 0;
-  const T = 0;
-
-  const index = -4.268 + 0.0294 * W * T - 0.0901 * W - 0.0000235 * (T ^ 3);
-};
-// Determine Daily Infection Condition Values (DICV) from the table
-export const lookUpToTable = (table, hrsRH, avgT) => {
-  const temps = table.filter(e => e[hrsRH])[0][hrsRH];
-  const hums = temps.filter(e => Object.keys(e)[0] === avgT)[0];
-  return hums[avgT];
-};
-
-// Returns an array with cumulative Daily Infection Critical Values
-export const cumulativeDICV = dicv => {
-  const arr = [];
-  dicv.reduce((prev, curr, i) => arr[i] = prev + curr, 0);
-  return arr;
-};
-
-// Returns an array of objects. Each object is a station with the following
-// properties: TO DO...
-export const matchIconsToStations = (stations, state) => {
-  const arr = [];
-  const newa = "http://newa.nrcc.cornell.edu/gifs/newa_small.png";
-  const newaGray = "http://newa.nrcc.cornell.edu/gifs/newa_smallGray.png";
-  const airport = "http://newa.nrcc.cornell.edu/gifs/airport.png";
-  const airportGray = "http://newa.nrcc.cornell.edu/gifs/airportGray.png";
-  const culog = "http://newa.nrcc.cornell.edu/gifs/culog.png";
-  const culogGray = "http://newa.nrcc.cornell.edu/gifs/culogGray.png";
-
-  stations.forEach(station => {
-    if (
-      station.network === "newa" ||
-      station.network === "njwx" ||
-      station.network === "miwx" ||
-      (station.network === "cu_log" && station.state !== "NY")
-    ) {
-      const newObj = station;
-      station.state === state.postalCode || state.postalCode === "ALL"
-        ? (newObj["icon"] = newa)
-        : (newObj["icon"] = newaGray);
-      arr.push(newObj);
-    } else if (station.network === "cu_log") {
-      const newObj = station;
-      station.state === state.postalCode || state.postalCode === "ALL"
-        ? (newObj["icon"] = culog)
-        : (newObj["icon"] = culogGray);
-      newObj["icon"] = culog;
-      arr.push(newObj);
-    } else if (station.network === "icao") {
-      const newObj = station;
-      station.state === state.postalCode || state.postalCode === "ALL"
-        ? (newObj["icon"] = airport)
-        : (newObj["icon"] = airportGray);
-      arr.push(newObj);
-    }
-  });
-  return arr;
-};
-
-export const logData = data => {
-  // const label = ([raw]) => {
-  //   const [color, label, ...message] = raw.split(" ");
-  //   return [
-  //     `%c${label}%c ${message.join(" ")}`,
-  //     `color: white;
-  //       background: ${color};
-  //       padding: .2em .2em`,
-  //     ""
-  //   ];
-  // };
-
+// Elements of leaflet array will be of value true if greater than zero
+export const leafWetness = data => {
   return data.map(day => {
+    return day[3].map(e => {
+      if (e !== "M") {
+        if (e > 0) {
+          return true;
+        }
+        return false;
+      }
+      return e;
+    });
+  });
+};
+
+export const IndexBotrytis = data => {
+  const W = data.lw;
+  const T = data.temp;
+
+  const index = -4.268 + 0.0294 * W * T - 0.0901 * W - 0.0000235 * W * (T ^ 3);
+  return index;
+};
+
+export const IndexAnthracnose = data => {
+  const W = data.lw;
+  const T = data.temp;
+
+  const index = -3.70 +
+    0.33 * W -
+    0.069 * W * T +
+    0.0050 * W * (T ^ 2) -
+    0.000093 * W * (T ^ 3);
+  return index;
+};
+
+// Returns an array of objects. Current application model
+export const currentModel = (station, data) => {
+  // shift the data to (1,24)
+  let results = noonToNoon(data);
+  results = results.slice(0, -1);
+
+  // If station is 'icao' adjust RH values
+  if (station.network === "icao") {
+    results = RHAdjustment(results);
+  }
+
+  // filter RH above 95
+  // results = above95(results);
+
+  // Build an array of objects with what you need...!
+  let arr = [];
+  for (const day of results) {
+    arr.push({
+      date: day[0],
+      temp: day[1],
+      rh: day[2],
+      botrytis: 0,
+      anthracnose: 0
+    });
+  }
+  return arr;
+};
+
+// Returns styled console.logs
+export const logData = data => {
+  for (const day of data) {
     const M = day
       .filter(d => Array.isArray(d))
       .map(e => e.filter(d => d === "M").length);
@@ -294,21 +316,5 @@ export const logData = data => {
       `,
       `background: #D8D8D8`
     );
-    console.log(
-      `LW -> %c${M[2]} %c${day[3]}`,
-      `color: red;
-        font-size: 12px;
-        margin-right: 10px;
-      `,
-      `background: #73EBC3`
-    );
-    console.log(
-      `PT -> %c${M[3]} %c${day[4]}`,
-      `color: red;
-        font-size: 12px;
-        margin-right: 10px;
-      `,
-      `background: #81CCF4`
-    );
-  });
+  }
 };

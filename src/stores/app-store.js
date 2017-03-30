@@ -1,11 +1,11 @@
 import { observable, action, computed } from "mobx";
-import { matchIconsToStations, lookUpToTable, cumulativeDICV } from "../utils";
+import { matchIconsToStations } from "../utils";
 import { states } from "../states";
-import { table } from "../views/Results/table";
-import { format } from "date-fns";
+import format from "date-fns/format";
 
 export default class AppStore {
   // logic------------------------------------------------------------------------------------
+  @observable protocol = window.location.protocol;
   @observable isSubmitted = false;
   @action setIsSubmitted = d => this.isSubmitted = d;
   @observable isLoading = true;
@@ -17,18 +17,37 @@ export default class AppStore {
       this.disease.length !== 0;
   }
   @observable isGraphDisplayed = false;
-  @action setIsGraphDisplayed = () =>
-    this.isGraphDisplayed = !this.isGraphDisplayed;
+  @action setIsGraphDisplayed = d => this.isGraphDisplayed = d;
   @observable dailyGraph = true;
   @action setDailyGraph = () => this.dailyGraph = !this.dailyGraph;
   @observable barColor;
   @action setBarColor = d => this.barColor = d;
 
+  // Router ------------------------------------------------------------------------------------
+  @observable isMap = false;
+  @action setIsMap = () => {
+    this.isMap = true;
+    this.isResults = false;
+    this.isMoreInfo = false;
+  };
+  @observable isResults = false;
+  @action setIsResults = () => {
+    this.isMap = false;
+    this.isResults = true;
+    this.isMoreInfo = false;
+  };
+  @observable isMoreInfo = false;
+  @action setIsMoreInfo = () => {
+    this.isMap = false;
+    this.isResults = false;
+    this.isMoreInfo = true;
+  };
+
   //Disease------------------------------------------------------------------------------------
-  @observable disease = JSON.parse(localStorage.getItem("disease")) || "";
+  @observable disease = JSON.parse(localStorage.getItem("beet-disease")) || "";
   @action setDisease = d => {
     this.disease = d;
-    localStorage.setItem("disease", JSON.stringify(this.disease));
+    localStorage.setItem("beet-disease", JSON.stringify(this.disease));
   };
   @observable selectDisease = this.disease ? true : false;
   @action setSelectDisease = d => this.selectDisease = d;
@@ -42,7 +61,12 @@ export default class AppStore {
     localStorage.setItem("state", JSON.stringify(this.state));
   };
   @observable selectState = this.state.name ? true : false;
-  @action setSelectState = d => this.selectState = d;
+  @action setSelectState = d => {
+    this.selectState = d;
+    if (this.isLoading) {
+      this.setIsMap();
+    }
+  };
   @observable stateR = {};
   @action setStateR = d => this.stateR = d;
 
@@ -50,7 +74,7 @@ export default class AppStore {
   @observable stations = [];
   @action setStations = d => this.stations = d;
   @computed get stationsWithMatchedIcons() {
-    return matchIconsToStations(this.stations, this.state);
+    return matchIconsToStations(this.protocol, this.stations, this.state);
   }
   @computed get getCurrentStateStations() {
     return this.stations.filter(
@@ -78,7 +102,7 @@ export default class AppStore {
     localStorage.setItem("endDate", JSON.stringify(this.endDate));
   };
   @computed get startDate() {
-    return `${format(this.endDate, "YYYY")}-04-23`;
+    return `${format(this.endDate, "YYYY")}-01-01`;
   }
   @computed get startDateYear() {
     return format(this.endDate, "YYYY");
@@ -86,7 +110,7 @@ export default class AppStore {
   @observable endDateR = format(new Date(), "YYYY-MM-DD");
   @action setEndDateR = d => this.endDateR = format(d, "YYYY-MM-DD");
   @computed get startDateR() {
-    return `${format(this.endDateR, "YYYY")}-04-23`;
+    return `${format(this.endDateR, "YYYY")}-01-01`;
   }
 
   // ACISData -----------------------------------------------------------------------------------
@@ -100,53 +124,5 @@ export default class AppStore {
   }
   @computed get temps() {
     return this.ACISData.map(e => e.temp);
-  }
-  @computed get avgTs() {
-    return this.ACISData.map(e => e.avgT);
-  }
-  @computed get hrsRHs() {
-    return this.ACISData.map(e => e.hrsRH);
-  }
-  @computed get DICV() {
-    return this.ACISData.map((day, i) => {
-      if (day.avgT > 58 && day.avgT < 95) {
-        return lookUpToTable(table, day.hrsRH.toString(), day.avgT.toString());
-      }
-      return 0;
-    });
-  }
-  @computed get A2Day() {
-    return this.DICV.map((e, i) => {
-      if (i > 0) {
-        return e + this.DICV[i - 1];
-      }
-      return e;
-    });
-  }
-  @computed get infectionRisk() {}
-
-  @computed get graphData() {
-    return this.ACISData.map((day, i) => {
-      return {
-        dates: format(this.dates[i], "MMM D"),
-        daily: this.DICV[i],
-        a2Day: this.A2Day[i],
-        hrs: this.hrsRHs[i],
-        unfavorable: 5,
-        marginal: 6,
-        favorable: Math.max(...this.A2Day)
-      };
-    });
-  }
-  @computed get season() {
-    return cumulativeDICV(this.DICV);
-  }
-  @computed get A14Day() {
-    const partial = this.DICV.slice(-22); // to be fixed if date is to close to April 23rd
-    return cumulativeDICV(partial);
-  }
-  @computed get A21Day() {
-    const partial = this.DICV.slice(-29);
-    return cumulativeDICV(partial);
   }
 }

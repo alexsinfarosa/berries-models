@@ -1,8 +1,12 @@
 import React, { Component } from "react";
 import { inject, observer } from "mobx-react";
 // import ResultsGraph from "./ResultsGraph";
-import _ from "lodash";
-import { format, isBefore, subDays } from "date-fns";
+
+// utility functions
+import takeRight from "lodash/takeRight";
+import format from "date-fns/format";
+import isBefore from "date-fns/is_before";
+import subDays from "date-fns/sub_days";
 
 // styles
 import "./results.css";
@@ -18,15 +22,8 @@ export default class ResultsTable extends Component {
       dates,
       stationR,
       endDateR,
-      // DICV,
-      // A2Day,
-      // A14Day,
-      // A21Day,
-      // season,
       currentYear,
-      startDateYear,
-      isGraphDisplayed,
-      setIsGraphDisplayed
+      startDateYear
     } = this.props.store.app;
 
     const months = dates.map(date => {
@@ -65,18 +62,6 @@ export default class ResultsTable extends Component {
       );
     }
 
-    // const displayA2Day = A2Day.map((e, i) => <td key={i}>{e}</td>);
-    // const daily = DICV.map((e, i) => <td key={i}>{e}</td>);
-    //
-    // const displayA2Day = A2Day.map((e, i) => {
-    //   if (e < 6) {
-    //     return <Low key={i}>{e}</Low>;
-    //   } else if (e === 6) {
-    //     return <Caution key={i}>{e}</Caution>;
-    //   }
-    //   return <High key={i}>{e}</High>;
-    // });
-
     return (
       <table>
         <thead>
@@ -88,37 +73,25 @@ export default class ResultsTable extends Component {
             {HeaderTable}
           </tr>
           <tr>
-            {/* <th /> */}
-            {_.takeRight(months, 8)}
+            {takeRight(months, 8)}
           </tr>
         </thead>
         <tbody>
           <tr>
             <th>Gray mold (Botrytis)</th>
-            {/* {_.takeRight(daily, 8)} */}
+            {/* {takeRight(daily, 8)} */}
           </tr>
           <tr>
             <th>Risk Levels</th>
-            {/* {_.takeRight(daily, 8)} */}
+            {/* {takeRight(daily, 8)} */}
           </tr>
           <tr>
             <th>Anthracnose</th>
-            {/* {_.takeRight(displayA2Day, 8)} */}
+            {/* {takeRight(displayA2Day, 8)} */}
           </tr>
           <tr>
             <th>Risk Levels</th>
-            {/* {_.takeRight(daily, 8)} */}
-          </tr>
-          <tr>
-            <td colSpan="9" className="has-text-centered graph">
-              <a className="graph-link" onClick={setIsGraphDisplayed}>
-                {isGraphDisplayed ? "Hide" : "Show"}
-                {" "}
-                Infection Value Graph
-              </a>
-
-              {/* {isGraphDisplayed && <ResultsGraph />} */}
-            </td>
+            {/* {takeRight(daily, 8)} */}
           </tr>
         </tbody>
       </table>
