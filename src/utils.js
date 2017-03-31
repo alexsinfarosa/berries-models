@@ -1,3 +1,5 @@
+import flatten from "lodash/flatten";
+
 // Returns an array of objects. Each object is a station with the following
 export const matchIconsToStations = (protocol, stations, state) => {
   const arr = [];
@@ -156,20 +158,38 @@ export const cumulativeDICV = dicv => {
   return arr;
 };
 
-// For each day it returns only temperature values where leaf wetness was above 90.
-export const above90 = data => {
-  let results = [];
+// Returns an array of arrays. Each array has a date (String), a temp (Array) and a LW array
+export const leafWetnessAndTemps = data => {
+  // Returns true if leaf wetness values are greater than 0
+  const LW = flatten(data.map(day => day[3].map(e => e > 0)));
+  // Returns true if relative humidity values are greater than or equal to 90
+  const RH = flatten(data.map(day => day[2].map(e => e >= 90)));
+  // Returns true if precipitation values are greater than 0
+  const PT = flatten(data.map(day => day[4].map(e => e > 0)));
 
-  for (const day of data) {
-    let currentDay = [day[0], [], [], [], []];
+  let params = [LW, RH, PT];
+  const transpose = m => m[0].map((x, i) => m.map(x => x[i]));
+  // Returns a true values if there is at least one true value in the array
+  const transposed = transpose(params).map(e => e.find(e => e === true));
 
-    for (let [i, e] of day[3].entries()) {
-      if (parseFloat(e) > 90) {
-        currentDay[1].push(day[1][i]);
-        currentDay[2].push(e);
+  let filteredLW = [];
+  while (transposed.length > 0) {
+    filteredLW.push(transposed.splice(0, 24));
+  }
+
+  const dates = data.map(day => day[0]);
+  const temps = filteredLW.map((day, d) => {
+    return day.map((e, i) => {
+      if (e === true) {
+        return data[d][1][i];
       }
-    }
-    results.push(currentDay);
+      return e;
+    });
+  });
+
+  let results = [];
+  for (const [i, d] of dates.entries()) {
+    results.push([d, [...temps[i]], [...filteredLW[i]]]);
   }
   return results;
 };
@@ -230,31 +250,31 @@ export const noonToNoon = data => {
 };
 
 // Elements of leaflet array will be of value true if greater than zero
-export const leafWetness = data => {
-  return data.map(day => {
-    return day[3].map(e => {
-      if (e !== "M") {
-        if (e > 0) {
-          return true;
-        }
-        return false;
-      }
-      return e;
-    });
-  });
-};
+// export const leafWetness = data => {
+//   return data.map(day => {
+//     return day[3].map(e => {
+//       if (e !== "M") {
+//         if (e > 0) {
+//           return true;
+//         }
+//         return false;
+//       }
+//       return e;
+//     });
+//   });
+// };
 
 export const IndexBotrytis = data => {
-  const W = data.lw;
-  const T = data.temp;
+  const T = data[1];
+  const W = data[2];
 
   const index = -4.268 + 0.0294 * W * T - 0.0901 * W - 0.0000235 * W * (T ^ 3);
   return index;
 };
 
 export const IndexAnthracnose = data => {
-  const W = data.lw;
-  const T = data.temp;
+  const T = data[1];
+  const W = data[2];
 
   const index = -3.70 +
     0.33 * W -
