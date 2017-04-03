@@ -119,10 +119,38 @@ export default class AppStore {
   @computed get dates() {
     return this.ACISData.map(e => e.date);
   }
-  @computed get rhs() {
-    return this.ACISData.map(e => e.rh);
-  }
   @computed get temps() {
     return this.ACISData.map(e => e.temp);
   }
+  @computed get rhs() {
+    return this.ACISData.map(e => e.rh);
+  }
+  @computed get lws() {
+    return this.ACISData.map(e => e.lw);
+  }
+  @computed get pts() {
+    return this.ACISData.map(e => e.pt);
+  }
+  @computed get botrytis() {
+    return this.ACISData.map(e => e.botrytis);
+  }
+  @computed get anthracnose() {
+    return this.ACISData.map(e => e.anthracnose);
+  }
+  @computed get A2DayBotrytis() {
+    return this.botrytis.map((e, i) => {
+      if (i > 0) {
+        return e + this.botrytis[i - 1];
+      }
+      return e;
+    });
+  }
+  @computed get A2DayAnthracnose() {
+  return this.anthracnose.map((e, i) => {
+    if (i > 0) {
+      return e + this.anthracnose[i - 1];
+    }
+    return e;
+  });
+}
 }

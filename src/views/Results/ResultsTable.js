@@ -12,7 +12,7 @@ import subDays from "date-fns/sub_days";
 import "./results.css";
 
 // styled-components
-// import { Low, Caution, High } from "./styles";
+import { Low, Caution, High } from "./styles";
 
 @inject("store")
 @observer
@@ -23,7 +23,9 @@ export default class ResultsTable extends Component {
       stationR,
       endDateR,
       currentYear,
-      startDateYear
+      startDateYear,
+      A2DayBotrytis,
+      A2DayAnthracnose
     } = this.props.store.app;
 
     const months = dates.map(date => {
@@ -62,6 +64,42 @@ export default class ResultsTable extends Component {
       );
     }
 
+    const displayA2DayBotrytis = A2DayBotrytis.map((e, i) => {
+      if (e < 0.50) {
+        return <Low key={i}>{e}</Low>;
+      } else if (e >= 0.50 && e < 0.70) {
+        return <Caution key={i}>{e}</Caution>;
+      }
+      return <High key={i}>{e}</High>;
+    });
+
+    const a2DayBotrytisInfectionRisk = A2DayBotrytis.map((e, i) => {
+      if (e < 0.50) {
+        return <Low key={i}><small>Low</small></Low>;
+      } else if (e >= 0.50 && e < 0.70) {
+        return <Caution key={i}><small>Moderate</small></Caution>;
+      }
+      return <High key={i}><small>High</small></High>;
+    });
+
+    const displayA2DayAnthracnose = A2DayAnthracnose.map((e, i) => {
+      if (e < 0.50) {
+        return <Low key={i}>{e}</Low>;
+      } else if (e >= 0.50 && e < 0.70) {
+        return <Caution key={i}>{e}</Caution>;
+      }
+      return <High key={i}>{e}</High>;
+    });
+
+    const a2DayAnthracnoseInfectionRisk = A2DayAnthracnose.map((e, i) => {
+      if (e < 0.50) {
+        return <Low key={i}><small>Low</small></Low>;
+      } else if (e >= 0.50 && e < 0.70) {
+        return <Caution key={i}><small>Moderate</small></Caution>;
+      }
+      return <High key={i}><small>High</small></High>;
+    });
+
     return (
       <table>
         <thead>
@@ -79,19 +117,19 @@ export default class ResultsTable extends Component {
         <tbody>
           <tr>
             <th>Gray mold (Botrytis)</th>
-            {/* {takeRight(daily, 8)} */}
+            {takeRight(displayA2DayBotrytis, 8)}
           </tr>
           <tr>
             <th>Risk Levels</th>
-            {/* {takeRight(daily, 8)} */}
+            {takeRight(a2DayBotrytisInfectionRisk, 8)}
           </tr>
           <tr>
             <th>Anthracnose</th>
-            {/* {takeRight(displayA2Day, 8)} */}
+            {takeRight(displayA2DayAnthracnose, 8)}
           </tr>
           <tr>
             <th>Risk Levels</th>
-            {/* {takeRight(daily, 8)} */}
+            {takeRight(a2DayAnthracnoseInfectionRisk, 8)}
           </tr>
         </tbody>
       </table>
