@@ -103,13 +103,16 @@ export const replaceNonConsecutiveMissingValues = data => {
 };
 
 // Returns acis with replaced consecutive values
-export const replaceConsecutiveMissingValues = (sister, acis) => {
-  return acis.map((day, d) => {
+export const replaceConsecutiveMissingValues = (
+  fromStation,
+  currentStation
+) => {
+  return currentStation.map((day, d) => {
     return day.map((param, p) => {
       if (Array.isArray(param)) {
         return param.map((e, i) => {
           if (e === "M") {
-            return sister[d][p][i];
+            return fromStation[d][p][i];
           } else {
             return e;
           }
@@ -167,6 +170,11 @@ export const average = data => {
   return Math.round(results.reduce((acc, val) => acc + val, 0) / data.length);
 };
 
+// Convert Fahrenheit to Celcius
+export const fahrenheitToCelcius = data => {
+  return (data - 32) * 5 / 9;
+};
+
 // This function will shift data from (0, 23) to (12, 24)
 export const noonToNoon = data => {
   let results = [];
@@ -222,7 +230,7 @@ export const leafWetnessAndTemps = data => {
   // Returns true if precipitation values are greater than 0
   const PT = flatten(data.map(day => day[4].map(e => e > 0)));
 
-  let params = [LW, RH, PT];
+  const params = [LW, RH, PT];
   const transpose = m => m[0].map((x, i) => m.map(x => x[i]));
   // Returns a true values if there is at least one true value in the array
   const transposed = transpose(params).map(e => e.find(e => e === true));
@@ -236,7 +244,7 @@ export const leafWetnessAndTemps = data => {
       const R = e;
       const T = R - L;
       const size = R - L + 1;
-      if (T < 6) {
+      if (T < 5) {
         pairs.push([L, R, size]);
       }
     }
@@ -278,27 +286,23 @@ export const leafWetnessAndTemps = data => {
 
 export const indexBotrytis = data => {
   return data.map(day => {
-    const T = day[1];
+    const T = fahrenheitToCelcius(day[1]);
     const W = day[2];
-
-    return Math.round(
-      -4.268 + 0.0294 * W * T - 0.0901 * W - 0.0000235 * W * T ** 3
-    );
+    const i = -4.268 + 0.0294 * W * T - 0.0901 * W - 0.0000235 * W * T ** 3;
+    return (1 / (1 + Math.exp(-i))).toFixed(2);
   });
 };
 
 export const indexAnthracnose = data => {
   return data.map(day => {
-    const T = day[1];
+    const T = fahrenheitToCelcius(day[1]);
     const W = day[2];
-
-    return Math.round(
-      -3.70 +
-        0.33 * W -
-        0.069 * W * T +
-        0.0050 * W * T ** 2 -
-        0.000093 * W * T ** 3
-    );
+    const i = -3.70 +
+      0.33 * W -
+      0.069 * W * T +
+      0.0050 * W * T ** 2 -
+      0.000093 * W * T ** 3;
+    return (1 / (1 + Math.exp(-i))).toFixed(2);
   });
 };
 

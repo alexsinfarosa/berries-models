@@ -28,6 +28,13 @@ export const states = [
     name: "DC"
   },
   {
+    postalCode: "KY",
+    lat: 37.5347,
+    lon: -85.3021,
+    zoom: 6,
+    name: "Kentucky"
+  },
+  {
     postalCode: "IL",
     lat: 40.0411,
     lon: -89.1965,

@@ -1,6 +1,6 @@
 import React, { Component } from "react";
 import { inject, observer } from "mobx-react";
-import { when } from "mobx";
+import { when, toJS } from "mobx";
 import axios from "axios";
 
 // fetch functions
@@ -135,7 +135,6 @@ class App extends Component {
       currentYear,
       startDateYear
     );
-
     acis = replaceConsecutiveMissingValues(sisterStationData, acis);
     if (currentYear !== startDateYear) {
       acis = currentModel(station, acis);
@@ -145,16 +144,18 @@ class App extends Component {
       setIsLoading(false);
       return;
     }
-
     let forecastData = await fetchForecastData(
       protocol,
       station,
       startDate,
       endDate
     );
+    // Forcast data needs to have relative humidity array adjusted
     forecastData = RHAdjustment(forecastData);
     acis = replaceConsecutiveMissingValues(forecastData, acis);
     acis = currentModel(station, acis);
+    // acis.map(day => console.log(toJS(day)));
+    // console.log("ciccio");
     this.props.store.app.setACISData(acis);
     setIsGraphDisplayed(true);
     setIsResults();

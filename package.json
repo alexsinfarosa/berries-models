@@ -1,6 +1,6 @@
 {
   "name": "beet",
-  "homepage": "http://newadata.nrcc.cornell.edu/beet/",
+  "homepage": "http://newadata.nrcc.cornell.edu/berry/",
   "version": "0.1.0",
   "private": true,
   "devDependencies": {

@@ -137,20 +137,4 @@ export default class AppStore {
   @computed get anthracnose() {
     return this.ACISData.map(e => e.anthracnose);
   }
-  @computed get A2DayBotrytis() {
-    return this.botrytis.map((e, i) => {
-      if (i > 0) {
-        return e + this.botrytis[i - 1];
-      }
-      return e;
-    });
-  }
-  @computed get A2DayAnthracnose() {
-  return this.anthracnose.map((e, i) => {
-    if (i > 0) {
-      return e + this.anthracnose[i - 1];
-    }
-    return e;
-  });
-}
 }

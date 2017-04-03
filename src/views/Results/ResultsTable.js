@@ -1,5 +1,6 @@
 import React, { Component } from "react";
 import { inject, observer } from "mobx-react";
+// import { toJS } from "mobx";
 // import ResultsGraph from "./ResultsGraph";
 
 // utility functions
@@ -24,8 +25,8 @@ export default class ResultsTable extends Component {
       endDateR,
       currentYear,
       startDateYear,
-      A2DayBotrytis,
-      A2DayAnthracnose
+      botrytis,
+      anthracnose
     } = this.props.store.app;
 
     const months = dates.map(date => {
@@ -64,7 +65,7 @@ export default class ResultsTable extends Component {
       );
     }
 
-    const displayA2DayBotrytis = A2DayBotrytis.map((e, i) => {
+    const displayBotrytis = botrytis.map((e, i) => {
       if (e < 0.50) {
         return <Low key={i}>{e}</Low>;
       } else if (e >= 0.50 && e < 0.70) {
@@ -73,7 +74,7 @@ export default class ResultsTable extends Component {
       return <High key={i}>{e}</High>;
     });
 
-    const a2DayBotrytisInfectionRisk = A2DayBotrytis.map((e, i) => {
+    const botrytisInfectionRisk = botrytis.map((e, i) => {
       if (e < 0.50) {
         return <Low key={i}><small>Low</small></Low>;
       } else if (e >= 0.50 && e < 0.70) {
@@ -82,7 +83,7 @@ export default class ResultsTable extends Component {
       return <High key={i}><small>High</small></High>;
     });
 
-    const displayA2DayAnthracnose = A2DayAnthracnose.map((e, i) => {
+    const displayAnthracnose = anthracnose.map((e, i) => {
       if (e < 0.50) {
         return <Low key={i}>{e}</Low>;
       } else if (e >= 0.50 && e < 0.70) {
@@ -91,7 +92,7 @@ export default class ResultsTable extends Component {
       return <High key={i}>{e}</High>;
     });
 
-    const a2DayAnthracnoseInfectionRisk = A2DayAnthracnose.map((e, i) => {
+    const anthracnoseInfectionRisk = anthracnose.map((e, i) => {
       if (e < 0.50) {
         return <Low key={i}><small>Low</small></Low>;
       } else if (e >= 0.50 && e < 0.70) {
@@ -115,21 +116,23 @@ export default class ResultsTable extends Component {
           </tr>
         </thead>
         <tbody>
+          <tr rowSpan="9" />
           <tr>
-            <th>Gray mold (Botrytis)</th>
-            {takeRight(displayA2DayBotrytis, 8)}
+            <th>Botrytis</th>
+            {takeRight(displayBotrytis, 8)}
           </tr>
           <tr>
             <th>Risk Levels</th>
-            {takeRight(a2DayBotrytisInfectionRisk, 8)}
+            {takeRight(botrytisInfectionRisk, 8)}
           </tr>
+          <tr rowSpan="9" />
           <tr>
             <th>Anthracnose</th>
-            {takeRight(displayA2DayAnthracnose, 8)}
+            {takeRight(displayAnthracnose, 8)}
           </tr>
           <tr>
             <th>Risk Levels</th>
-            {takeRight(a2DayAnthracnoseInfectionRisk, 8)}
+            {takeRight(anthracnoseInfectionRisk, 8)}
           </tr>
         </tbody>
       </table>
