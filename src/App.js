@@ -195,7 +195,7 @@ class App extends Component {
         <Testing />
         <MyApp>
           <h2 style={{ marginTop: "0" }}>
-            Cercospora Beticola Infection Prediction Model
+            Berry Disease Prediction Model
           </h2>
           <Main>
             <LeftContainer>

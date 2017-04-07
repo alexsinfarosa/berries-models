@@ -26,7 +26,7 @@ class Disease extends Component {
             ? null
             : <option>Select Disease</option>}
           <option value="Strawberries">Strawberries</option>
-          <option value="Blueberries">Blueberries</option>
+          {/* <option value="Blueberries">Blueberries</option> */}
         </Select>
       </Selector>
     );
