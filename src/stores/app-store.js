@@ -113,7 +113,7 @@ export default class AppStore {
     return `${format(this.endDateR, "YYYY")}-01-01`;
   }
 
-  // ACISData -----------------------------------------------------------------------------------
+  // ACISData ---------------------------------------------------------------------------------
   @observable ACISData = [];
   @action setACISData = d => this.ACISData = d;
   @computed get dates() {

@@ -37,7 +37,7 @@ export const Main = styled.div`
 export const LeftContainer = styled.div`
   border: 1px solid #808080;
   height: 280px;
-  flex-basis: 220px;
+  flex-basis: 225px;
   margin-right: 10px;
   padding: 10px;
   font-size: 15px;
@@ -106,6 +106,8 @@ export const CalculateBtn = styled.button`
   border: 1px solid #FFA500;
   font-size: 14px;
   cursor: pointer;
+  padding: 3px 5px;
+  border-radius: 3px;
 
   cursor: ${props => props.inactive && "not-allowed"};
   pointer-events: ${props => props.inactive && "none"};
@@ -119,4 +121,10 @@ export const CalculateBtn = styled.button`
   &:focus {
     outline: none;
   }
+`;
+
+export const BtnLoading = styled.div`
+  display: flex;
+  justify-content: flex-start;
+  align-content: center;
 `;

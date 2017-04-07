@@ -26,19 +26,25 @@ export default class ResultsTable extends Component {
       currentYear,
       startDateYear,
       botrytis,
-      anthracnose
+      anthracnose,
+      isLoading
     } = this.props.store.app;
 
     const months = dates.map(date => {
-      if (isBefore(subDays(date, 1), endDateR)) {
-        return (
-          <th className="months before" key={date}>{format(date, "MMM D")}</th>
-        );
-      } else {
-        return (
-          <th className="months after" key={date}>{format(date, "MMM D")}</th>
-        );
+      if (!isLoading) {
+        if (isBefore(subDays(date, 1), endDateR)) {
+          return (
+            <td className="months before" key={date}>
+              {format(date, "MMM D")}
+            </td>
+          );
+        } else {
+          return (
+            <td className="months after" key={date}>{format(date, "MMM D")}</td>
+          );
+        }
       }
+      return <td key={date} />;
     });
 
     let HeaderTable = null;
@@ -66,46 +72,58 @@ export default class ResultsTable extends Component {
     }
 
     const displayBotrytis = botrytis.map((e, i) => {
-      if (e < 0.50) {
-        return <Low key={i}>{e}</Low>;
-      } else if (e >= 0.50 && e < 0.70) {
-        return <Caution key={i}>{e}</Caution>;
+      if (!isLoading) {
+        if (e < 0.50) {
+          return <Low key={i}>{e}</Low>;
+        } else if (e >= 0.50 && e < 0.70) {
+          return <Caution key={i}>{e}</Caution>;
+        }
+        return <High key={i}>{e}</High>;
       }
-      return <High key={i}>{e}</High>;
+      return <th key={i} />;
     });
 
     const botrytisInfectionRisk = botrytis.map((e, i) => {
-      if (e < 0.50) {
-        return <Low key={i}><small>Low</small></Low>;
-      } else if (e >= 0.50 && e < 0.70) {
-        return <Caution key={i}><small>Moderate</small></Caution>;
+      if (!isLoading) {
+        if (e < 0.50) {
+          return <Low key={i}><small>Low</small></Low>;
+        } else if (e >= 0.50 && e < 0.70) {
+          return <Caution key={i}><small>Moderate</small></Caution>;
+        }
+        return <High key={i}><small>High</small></High>;
       }
-      return <High key={i}><small>High</small></High>;
+      return <th key={i} />;
     });
 
     const displayAnthracnose = anthracnose.map((e, i) => {
-      if (e < 0.50) {
-        return <Low key={i}>{e}</Low>;
-      } else if (e >= 0.50 && e < 0.70) {
-        return <Caution key={i}>{e}</Caution>;
+      if (!isLoading) {
+        if (e < 0.50) {
+          return <Low key={i}>{e}</Low>;
+        } else if (e >= 0.50 && e < 0.70) {
+          return <Caution key={i}>{e}</Caution>;
+        }
+        return <High key={i}>{e}</High>;
       }
-      return <High key={i}>{e}</High>;
+      return <th key={i} />;
     });
 
     const anthracnoseInfectionRisk = anthracnose.map((e, i) => {
-      if (e < 0.50) {
-        return <Low key={i}><small>Low</small></Low>;
-      } else if (e >= 0.50 && e < 0.70) {
-        return <Caution key={i}><small>Moderate</small></Caution>;
+      if (!isLoading) {
+        if (e < 0.50) {
+          return <Low key={i}><small>Low</small></Low>;
+        } else if (e >= 0.50 && e < 0.70) {
+          return <Caution key={i}><small>Moderate</small></Caution>;
+        }
+        return <High key={i}><small>High</small></High>;
       }
-      return <High key={i}><small>High</small></High>;
+      return <th key={i} />;
     });
 
     return (
       <table>
         <thead>
           <tr>
-            <th rowSpan="2" />
+            <th className="th-label" rowSpan="2" />
             <th className="before">Past</th>
             <th className="before">Past</th>
             <th className="before">Current</th>
@@ -118,20 +136,20 @@ export default class ResultsTable extends Component {
         <tbody>
           <tr rowSpan="9" />
           <tr>
-            <th>Botrytis</th>
+            <th className="th-label">Botrytis</th>
             {takeRight(displayBotrytis, 8)}
           </tr>
           <tr>
-            <th>Risk Levels</th>
+            <th className="th-label">Risk Levels</th>
             {takeRight(botrytisInfectionRisk, 8)}
           </tr>
           <tr rowSpan="9" />
           <tr>
-            <th>Anthracnose</th>
+            <th className="th-label">Anthracnose</th>
             {takeRight(displayAnthracnose, 8)}
           </tr>
           <tr>
-            <th>Risk Levels</th>
+            <th className="th-label">Risk Levels</th>
             {takeRight(anthracnoseInfectionRisk, 8)}
           </tr>
         </tbody>

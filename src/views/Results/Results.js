@@ -33,7 +33,6 @@ export default class Results extends Component {
     } else {
       return (
         <Wrapper>
-
           {/* HEADER */}
           <ResultsHeader />
 
@@ -55,7 +54,6 @@ export default class Results extends Component {
               </a>
             </figure>
           </Images>
-
         </Wrapper>
       );
     }

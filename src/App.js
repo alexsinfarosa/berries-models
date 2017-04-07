@@ -1,6 +1,6 @@
 import React, { Component } from "react";
 import { inject, observer } from "mobx-react";
-import { when, toJS } from "mobx";
+import { when } from "mobx";
 import axios from "axios";
 
 // fetch functions
@@ -30,7 +30,8 @@ import {
   CalculateBtn,
   Ul,
   Li,
-  A
+  A,
+  BtnLoading
 } from "./styles";
 
 // styles
@@ -42,6 +43,7 @@ import Disease from "./components/Disease";
 import State from "./components/State";
 import Station from "./components/Station";
 import Calendar from "./components/Calendar";
+import Spinner from "react-spinkit";
 
 // views
 import TheMap from "./views/TheMap";
@@ -69,9 +71,9 @@ class App extends Component {
       .get(`${protocol}//newa2.nrcc.cornell.edu/newaUtil/stateStationList/eslw`)
       .then(res => {
         this.props.store.app.setStations(res.data.stations);
-        if (this.props.store.app.areRequiredFieldsSet) {
-          this.calculate();
-        }
+        // if (this.props.store.app.areRequiredFieldsSet) {
+        //   this.calculate();
+        // }
       })
       .catch(err => {
         console.log(err);
@@ -91,6 +93,7 @@ class App extends Component {
     this.props.store.app.setStationR(station);
     this.props.store.app.setEndDateR(endDate);
 
+    this.props.store.app.setIsLoading(true);
     this.getData();
   };
 
@@ -205,9 +208,18 @@ class App extends Component {
               <Calendar />
               <br />
               {areRequiredFieldsSet
-                ? <CalculateBtn onClick={this.calculate}>
-                    Calculate
-                  </CalculateBtn>
+                ? <BtnLoading>
+                    <CalculateBtn onClick={this.calculate}>
+                      Calculate
+                    </CalculateBtn>
+                    {isLoading &&
+                      isResults &&
+                      <Spinner
+                        spinnerName="circle"
+                        noFadeIn
+                        style={{ marginLeft: "15px" }}
+                      />}
+                  </BtnLoading>
                 : <CalculateBtn inactive onClick={this.calculate}>
                     Calculate
                   </CalculateBtn>}
